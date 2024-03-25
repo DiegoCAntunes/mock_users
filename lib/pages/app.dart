@@ -18,14 +18,19 @@ class _AppState extends State<AppScreen> {
 
   Future<void> readFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      String? filePath = result.files.single.path;
-      print(filePath);
-      String data = await _dataReader.pickAndReadFile(filePath);
 
-      setState(() {
-        _fileContent = data;
-      });
+    if (result != null) {
+      // Directly update the class-level `filePath` variable
+      filePath = result.files.single.path ??
+          ""; // Use '??' to provide an empty string as a fallback
+      print(filePath);
+      if (filePath.isNotEmpty) {
+        String data = await _dataReader.pickAndReadFile(filePath);
+
+        setState(() {
+          _fileContent = data;
+        });
+      }
     } else {
       print("No file selected");
     }

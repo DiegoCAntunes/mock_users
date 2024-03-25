@@ -9,7 +9,8 @@ class DataCreate {
   final Random random = Random();
   final int recordSize =
       2 + 2 + 30 + 1 + 8 + 8 + 6 + 16 + 1 + 2 + 2 + 1 + 1 + 1 + 6 + 1 + 4 + 4;
-  final int targetRecords = 4000;
+  final int targetRecords = 4000 - 109;
+  int currentId = 110;
 
   Future<void> completeFileWithRecords(String filePath) async {
     var directory = File(filePath).parent;
@@ -25,7 +26,7 @@ class DataCreate {
       ByteData byteData = ByteData.sublistView(recordBytes);
 
       // Example: Writing random iID and iIDPai (2 bytes each)
-      byteData.setUint16(0, random.nextInt(65536), Endian.little);
+      byteData.setUint16(0, currentId++, Endian.little);
       byteData.setUint16(2, random.nextInt(65536), Endian.little);
 
       // vbNome
