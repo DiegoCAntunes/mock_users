@@ -21,9 +21,7 @@ class _AppState extends State<AppScreen> {
 
     if (result != null) {
       // Directly update the class-level `filePath` variable
-      filePath = result.files.single.path ??
-          ""; // Use '??' to provide an empty string as a fallback
-      print(filePath);
+      filePath = result.files.single.path ?? "";
       if (filePath.isNotEmpty) {
         String data = await _dataReader.pickAndReadFile(filePath);
 
@@ -37,7 +35,6 @@ class _AppState extends State<AppScreen> {
   }
 
   void completeList() async {
-    print(filePath);
     if (filePath != "") {
       DataCreate dataCreate = DataCreate();
       await dataCreate.completeFileWithRecords(filePath);
