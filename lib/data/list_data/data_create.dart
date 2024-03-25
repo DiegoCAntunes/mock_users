@@ -9,7 +9,7 @@ class DataCreate {
   final Random random = Random();
   final int recordSize =
       2 + 2 + 30 + 1 + 8 + 8 + 6 + 16 + 1 + 2 + 2 + 1 + 1 + 1 + 6 + 1 + 4 + 4;
-  int lastId = 109;
+  int lastId = 0;
   int targetRecords = 0;
   int currentId = 110;
   int currentRfidIndex = 0;
@@ -66,7 +66,7 @@ class DataCreate {
       recordBytes.setRange(4, 4 + min(nameBytes.length, 30), nameBytes);
 
       // bTipo
-      recordBytes[34] = random.nextInt(9);
+      recordBytes[34] = random.nextInt(5);
 
       // vbSenha (Password)
       String rawPassword =

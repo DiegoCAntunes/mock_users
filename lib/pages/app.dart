@@ -50,7 +50,7 @@ class _AppState extends State<AppScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Fabio usuario mock"),
+        title: const Text("Lista de Usuários"),
       ),
       body: Center(
         child: Padding(
