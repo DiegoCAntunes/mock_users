@@ -55,17 +55,20 @@ class DataCreate {
       List<int> nameBytes = utf8.encode(name);
       recordBytes.setRange(4, 4 + min(nameBytes.length, 30), nameBytes);
 
+      // bTipo
+      recordBytes[34] = random.nextInt(9);
+
       // vbSenha (Password)
-      // Generate a password "00" followed by 6 digits
       String rawPassword =
-          "00${List.generate(6, (_) => random.nextInt(10)).join()}";
+          "${(random.nextInt(10) + 1).toString().padLeft(2, '0')}${List.generate(6, (_) => random.nextInt(10)).join()}";
+
       Uint8List passwordBytes = Uint8List.fromList(utf8.encode(rawPassword));
       converteSenha(passwordBytes); // Apply conversion
       recordBytes.setRange(
-          34, 42, passwordBytes); // Set the converted password in the record
+          35, 43, passwordBytes); // Set the converted password in the record
 
       // Fill the rest of the fields with random data for simplicity
-      for (int j = 42; j < recordBytes.length; j++) {
+      for (int j = 43; j < recordBytes.length; j++) {
         recordBytes[j] = random.nextInt(256);
       }
 

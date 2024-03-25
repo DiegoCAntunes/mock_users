@@ -41,6 +41,11 @@ class _AppState extends State<AppScreen> {
     if (filePath != "") {
       DataCreate dataCreate = DataCreate();
       await dataCreate.completeFileWithRecords(filePath);
+      showDialog(
+          context: context,
+          builder: (_) => const AlertDialog(
+              title: Text(
+                  "Arquivo completo! Salvo na mesma pasta do arquivo original")));
     }
   }
 
@@ -48,7 +53,7 @@ class _AppState extends State<AppScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My App"),
+        title: const Text("Fabio usuario mock"),
       ),
       body: Center(
         child: Padding(
@@ -57,12 +62,13 @@ class _AppState extends State<AppScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                width: 500,
-                height: 200,
+                width: 550,
+                height: 300,
                 decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
                   border: Border.all(
                     color: Colors.black,
-                    width: 2,
+                    width: 1,
                   ),
                 ),
                 child: SingleChildScrollView(
