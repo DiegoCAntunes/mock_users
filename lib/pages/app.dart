@@ -39,14 +39,9 @@ class _AppState extends State<AppScreen> {
   void completeList() async {
     print(filePath);
     if (filePath != "") {
-      // Assuming DataCreate is correctly set up and accessible
       DataCreate dataCreate = DataCreate();
       await dataCreate.completeFileWithRecords(filePath);
     }
-  }
-
-  void saveAs() {
-    // Add functionality to save as a new file
   }
 
   @override
@@ -97,10 +92,6 @@ class _AppState extends State<AppScreen> {
                     ),
                     const SizedBox(
                       width: 20,
-                    ),
-                    ElevatedButton(
-                      onPressed: saveAs,
-                      child: const Text("Save As"),
                     ),
                   ],
                 ),

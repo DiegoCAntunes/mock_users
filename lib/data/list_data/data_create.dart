@@ -12,20 +12,41 @@ class DataCreate {
   final int targetRecords = 4000 - 109;
   int currentId = 110;
 
-  Future<void> completeFileWithRecords(String filePath) async {
-    var directory = File(filePath).parent;
-    var newFileName = 'new_${File(filePath).uri.pathSegments.last}';
+  Future<void> completeFileWithRecords(String originalFilePath) async {
+    File originalFile = File(originalFilePath);
+
+    // Prepare to read existing data from the original file
+    Uint8List existingData = Uint8List(0);
+    if (await originalFile.exists()) {
+      print("Reading existing data...");
+      existingData = await originalFile.readAsBytes();
+    }
+
+    // Directory of the original file
+    var directory = originalFile.parent;
+
+    // New file name based on the original file's name
+    var newFileName = 'new_${originalFile.uri.pathSegments.last}';
     var newFile = File('${directory.path}/$newFileName');
 
-    await newFile.create(recursive: true); // Ensure the new file exists
-    var sink = newFile.openWrite(mode: FileMode.write);
+    // Ensure the new file exists
+    await newFile.create(recursive: true);
 
-    print("Started appending records to the file...");
+    // Open the sink for writing both existing and new data
+    var sink = newFile.openWrite(mode: FileMode.write);
+    print("Started writing to the new file...");
+
+    // First, write the existing data to the new file
+    if (existingData.isNotEmpty) {
+      sink.add(existingData);
+    }
+
+    // Generate and append new records to the new file
     for (int i = 0; i < targetRecords; i++) {
       Uint8List recordBytes = Uint8List(recordSize);
       ByteData byteData = ByteData.sublistView(recordBytes);
 
-      // Example: Writing random iID and iIDPai (2 bytes each)
+      // Populate the byte data for each record...
       byteData.setUint16(0, currentId++, Endian.little);
       byteData.setUint16(2, random.nextInt(65536), Endian.little);
 
@@ -48,14 +69,14 @@ class DataCreate {
         recordBytes[j] = random.nextInt(256);
       }
 
-      // Append the generated record to the file
+      // Append the generated record to the new file
       sink.add(recordBytes);
     }
 
     await sink.flush();
     await sink.close();
 
-    print("Completed. New file with updated records: ${newFile.path}");
+    print("Completed. New file with all records: ${newFile.path}");
   }
 
   void converteSenha(Uint8List pt) {
