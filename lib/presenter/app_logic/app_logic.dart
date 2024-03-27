@@ -10,19 +10,19 @@ class AppLogic {
   List<PessoaStruct> records = [];
   String filePath = "";
 
-  Future<String> readFile() async {
-    String fileContent = "Preview";
+  Future<List<PessoaStruct>> readFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       filePath = result.files.single.path ?? "";
       if (filePath.isNotEmpty) {
-        fileContent = await _dataReader.pickAndReadFile(filePath);
+        records = _dataReader
+            .parseBinFile(filePath); // Directly get the list of records
       }
     } else {
       print("No file selected");
     }
-    return fileContent;
+    return records;
   }
 
   Future<void> completeList(BuildContext context) async {

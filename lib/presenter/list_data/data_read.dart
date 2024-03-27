@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 class PessoaStruct {
@@ -7,6 +9,7 @@ class PessoaStruct {
   String vbNome;
   String bTipo;
   String vbSenha;
+  int recordSize = 96;
 
   var vbRfid;
   var vbNfc;
@@ -48,6 +51,89 @@ class PessoaStruct {
     List<String> numbers = vbPav.split(',');
     String firstFourNumbers = numbers.take(4).join(',');
     return '$iID / $vbNome / $bTipo / $vbSenha / $vbRfid / $firstFourNumbers...';
+  }
+
+  Uint8List toBytes() {
+    Uint8List recordBytes = Uint8List(recordSize);
+    ByteData byteData = ByteData.sublistView(recordBytes);
+
+    int offset = 0;
+
+    byteData.setUint16(offset, iID, Endian.little);
+    offset += 2;
+
+    byteData.setUint16(offset, iIDPai, Endian.little);
+    offset += 2;
+
+    // Encode vbNome to UTF-8 and ensure it doesn't exceed 30 bytes
+    List<int> nameBytes = utf8.encode(vbNome);
+    recordBytes.setRange(offset, offset + min(nameBytes.length, 30), nameBytes);
+    offset += 30;
+
+    // Convert bTipo to int and set as uint8
+    byteData.setUint8(offset, int.parse(bTipo));
+    offset += 1;
+
+    // Encode vbSenha to UTF-8 and ensure it doesn't exceed 8 bytes
+    List<int> senhaBytes = utf8.encode(vbSenha);
+    recordBytes.setRange(
+        offset, offset + min(senhaBytes.length, 8), senhaBytes);
+    offset += 8;
+
+    // Encode vbRfid to UTF-8 and ensure it doesn't exceed 8 bytes
+    List<int> rfidBytes = utf8.encode(vbRfid);
+    recordBytes.setRange(offset, offset + min(rfidBytes.length, 8), rfidBytes);
+    offset += 8;
+
+    // Encode vbNfc to UTF-8 and ensure it doesn't exceed 6 bytes
+    List<int> nfcBytes = utf8.encode(vbNfc);
+    recordBytes.setRange(offset, offset + min(nfcBytes.length, 6), nfcBytes);
+    offset += 6;
+
+    List<int> pavBytes = utf8.encode(vbPav);
+    recordBytes.setRange(offset, offset + min(pavBytes.length, 16), pavBytes);
+    offset += 16;
+
+    byteData.setUint8(offset, int.parse(bDiaSemana));
+    offset += 1;
+
+    List<String> hrInicialParts = vbHrInicial.split(':');
+    byteData.setUint8(offset, int.parse(hrInicialParts[0]));
+    offset += 1;
+    byteData.setUint8(offset, int.parse(hrInicialParts[1]));
+    offset += 1;
+
+    List<String> hrFinalParts = vbHrFinal.split(':');
+    byteData.setUint8(offset, int.parse(hrFinalParts[0]));
+    offset += 1;
+    byteData.setUint8(offset, int.parse(hrFinalParts[1]));
+    offset += 1;
+
+    byteData.setUint8(offset, int.parse(bPodeCadastrar));
+    offset += 1;
+    byteData.setUint8(offset, int.parse(bPodeLiberar));
+    offset += 1;
+    byteData.setUint8(offset, int.parse(bEditado));
+    offset += 1;
+
+    List<int> apartamentoBytes = utf8.encode(bApartamento);
+    recordBytes.setRange(
+        offset, offset + min(apartamentoBytes.length, 6), apartamentoBytes);
+    offset += 6;
+
+    byteData.setUint8(offset, int.parse(vbVersao));
+    offset += 1;
+
+    List<int> dataHoraInicialBytes = utf8.encode(vbDataHoraInicial);
+    recordBytes.setRange(offset, offset + min(dataHoraInicialBytes.length, 4),
+        dataHoraInicialBytes);
+    offset += 4;
+
+    List<int> dataHoraFinalBytes = utf8.encode(vbDataHoraFinal);
+    recordBytes.setRange(
+        offset, offset + min(dataHoraFinalBytes.length, 4), dataHoraFinalBytes);
+
+    return recordBytes;
   }
 }
 

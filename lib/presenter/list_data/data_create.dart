@@ -3,16 +3,33 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:faker/faker.dart';
+import 'package:mock_users/presenter/list_data/data_read.dart';
 
 class DataCreate {
   final Faker faker = Faker();
   final Random random = Random();
-  final int recordSize =
-      2 + 2 + 30 + 1 + 8 + 8 + 6 + 16 + 1 + 2 + 2 + 1 + 1 + 1 + 6 + 1 + 4 + 4;
+  final int recordSize = 96;
   int lastId = 0;
   int targetRecords = 0;
   int currentId = 110;
   int currentRfidIndex = 0;
+
+  void updateRecord(String filePath, int index, PessoaStruct updatedRecord) {
+    // Calculate the offset for the record in the file
+    int offset = index * recordSize;
+
+    // Open the file for writing in random access mode
+    RandomAccessFile file = File(filePath).openSync(mode: FileMode.write);
+
+    // Move the file pointer to the position of the record
+    file.setPositionSync(offset);
+
+    // Write the updated record to the file
+    file.writeFromSync(updatedRecord.toBytes());
+
+    // Close the file
+    file.closeSync();
+  }
 
   Future<void> completeFileWithRecords(String originalFilePath) async {
     File originalFile = File(originalFilePath);

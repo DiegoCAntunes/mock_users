@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mock_users/presenter/app_logic/app_logic.dart';
+import 'package:mock_users/ui/widgets/edit_dialog.dart.dart';
 
 import '../../presenter/list_data/data_read.dart';
 
@@ -28,37 +29,14 @@ class _AppState extends State<AppScreen> {
   }
 
   void _showEditDialog(BuildContext context, PessoaStruct pessoa, int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // Return a dialog or a full page here
-        return AlertDialog(
-          title: const Text('Edit User'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                    'Name: ${pessoa.vbNome}'), // Replace with TextFields for editing
-                // Repeat for other attributes of PessoaStruct
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text('Save'),
-              onPressed: () {
-                // Implement save logic here
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    EditDialog.show(context, pessoa, index, (updatedRecord) {
+      setState(() {
+        // Update the record in your data list
+        _appLogic.records[index] = updatedRecord;
+        // Update the file with the edited data (you need to implement this logic)
+        _dataCreate.updateRecord(filePath, index, updatedRecord);
+      });
+    });
   }
 
   @override
