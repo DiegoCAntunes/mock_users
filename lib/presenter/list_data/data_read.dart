@@ -45,7 +45,9 @@ class PessoaStruct {
 
   @override
   String toString() {
-    return '$iID / $vbNome / $bTipo / $vbSenha / $vbRfid / $vbPav...';
+    List<String> numbers = vbPav.split(',');
+    String firstFourNumbers = numbers.take(4).join(',');
+    return '$iID / $vbNome / $bTipo / $vbSenha / $vbRfid / $firstFourNumbers...';
   }
 }
 
@@ -68,15 +70,7 @@ class DataReader {
     final fileBytes = file.readAsBytesSync();
     List<PessoaStruct> records = [];
     int offset = 0;
-    // Adjusted record size to include all fields + 8 bytes for NFC and 16 bytes unspecified
-    const int recordSize = 2 +
-        2 +
-        30 +
-        1 +
-        8 +
-        8 +
-        16 +
-        9; // Total size of each record with all fields
+    const int recordSize = 96;
     final totalSize = fileBytes.length;
 
     while (offset + recordSize <= totalSize) {
@@ -93,7 +87,6 @@ class DataReader {
       offset += 30;
 
       String bTipo = buffer.getUint8(offset).toString();
-
       offset += 1;
 
       Uint8List passwordSegment =
@@ -109,9 +102,46 @@ class DataReader {
 
       offset += 8;
 
-      String vbPav = fileBytes.sublist(offset, offset + 4).toString();
+      String vbNfc = fileBytes.sublist(offset, offset + 6).toString();
+      vbRfid = vbRfid.replaceAll(RegExp(r'[\[\]]'), '');
+      vbRfid = vbRfid.replaceAll(', ', '.');
+
+      offset += 6;
+
+      String vbPav = fileBytes.sublist(offset, offset + 16).toString();
       vbPav = vbPav.replaceAll(RegExp(r'[\[\]]'), '');
-      offset += 45;
+      offset += 16;
+
+      String bDiaSemana = buffer.getUint8(offset).toString();
+      offset += 1;
+
+      String vbHrInicial = fileBytes.sublist(offset, offset + 2).toString();
+      offset += 2;
+
+      String vbHrFinal = fileBytes.sublist(offset, offset + 2).toString();
+      offset += 2;
+
+      String bPodeCadastrar = buffer.getUint8(offset).toString();
+      offset += 1;
+
+      String bPodeLiberar = buffer.getUint8(offset).toString();
+      offset += 1;
+
+      String bEditado = buffer.getUint8(offset).toString();
+      offset += 1;
+
+      String bApartamento = fileBytes.sublist(offset, offset + 6).toString();
+      offset += 6;
+
+      String vbVersao = buffer.getUint8(offset).toString();
+      offset += 1;
+
+      String vbDataHoraInicial =
+          fileBytes.sublist(offset, offset + 4).toString();
+      offset += 4;
+
+      String vbDataHoraFinal = fileBytes.sublist(offset, offset + 4).toString();
+      offset += 4;
 
       records.add(PessoaStruct(
         iID: iID,
@@ -120,18 +150,18 @@ class DataReader {
         bTipo: bTipo,
         vbSenha: vbSenha,
         vbRfid: vbRfid,
-        vbNfc: null,
-        vbHrFinal: null,
+        vbNfc: vbNfc,
         vbPav: vbPav,
-        bDiaSemana: null,
-        vbHrInicial: null,
-        bPodeLiberar: null,
-        bPodeCadastrar: null,
-        bEditado: null,
-        bApartamento: null,
-        vbVersao: null,
-        vbDataHoraInicial: null,
-        vbDataHoraFinal: null,
+        bDiaSemana: bDiaSemana,
+        vbHrInicial: vbHrInicial,
+        vbHrFinal: vbHrFinal,
+        bPodeCadastrar: bPodeCadastrar,
+        bPodeLiberar: bPodeLiberar,
+        bEditado: bEditado,
+        bApartamento: bApartamento,
+        vbVersao: vbVersao,
+        vbDataHoraInicial: vbDataHoraInicial,
+        vbDataHoraFinal: vbDataHoraFinal,
       ));
     }
     return records;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mock_users/pages/app.dart';
+import 'package:mock_users/ui/pages/app.dart';
 import 'package:window_size/window_size.dart';
 
 void main() {
