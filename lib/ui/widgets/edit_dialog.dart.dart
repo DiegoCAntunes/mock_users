@@ -17,6 +17,7 @@ class EditDialog extends StatefulWidget {
 
 class _EditDialogState extends State<EditDialog> {
   late PessoaStruct _editedPessoa;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -61,63 +62,66 @@ class _EditDialogState extends State<EditDialog> {
     return AlertDialog(
       title: const Text('Edit User'),
       content: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            _buildTextField('Parent ID', _editedPessoa.iIDPai.toString(),
-                (val) => _editedPessoa.iIDPai = int.parse(val)),
-            _buildTextField('Name', _editedPessoa.vbNome,
-                (val) => _editedPessoa.vbNome = val),
-            _buildTextField('Type', _editedPessoa.bTipo,
-                (val) => _editedPessoa.bTipo = val),
-            _buildTextField('Password', _editedPessoa.vbSenha,
-                (val) => _editedPessoa.vbSenha = val),
-            _buildTextField('RFID', _editedPessoa.vbRfid,
-                (val) => _editedPessoa.vbRfid = val),
-            _buildTextField(
-                'NFC', _editedPessoa.vbNfc, (val) => _editedPessoa.vbNfc = val),
-            _buildTextField(
-                'Pav', _editedPessoa.vbPav, (val) => _editedPessoa.vbPav = val),
-            _buildTextField('Weekday', _editedPessoa.bDiaSemana,
-                (val) => _editedPessoa.bDiaSemana = int.parse(val)),
-            _buildByteField('Initial Hour', _editedPessoa.vbHrInicial,
-                (val) => _editedPessoa.vbHrInicial = val),
-            _buildByteField('Final Hour', _editedPessoa.vbHrFinal,
-                (val) => _editedPessoa.vbHrFinal = val),
-            _buildTextField(
-                'Can Register',
-                _editedPessoa.bPodeCadastrar.toString(),
-                (val) => _editedPessoa.bPodeCadastrar = int.parse(val)),
-            _buildTextField(
-              'Can Release',
-              _editedPessoa.bPodeLiberar.toString(),
-              (val) => _editedPessoa.bPodeLiberar = int.parse(val),
-            ),
-            _buildTextField(
-              'Edited',
-              _editedPessoa.bEditado.toString(),
-              (val) => _editedPessoa.bEditado = int.parse(val),
-            ),
-            /*_buildByteField(
-              'Apartment',
-              _editedPessoa.bApartamento,
-              (val) => _editedPessoa.bApartamento = val,
-            ),
-            _buildTextField(
-              'Version',
-              _editedPessoa.vbVersao,
-              (val) => _editedPessoa.vbVersao = val,
-            ),
-            _buildByteField(
-              'Initial Date Time',
-              _editedPessoa.vbDataHoraInicial,
-              (val) => _editedPessoa.vbDataHoraInicial = val,
-            ),
-            _buildByteField(
-              'Final Date Time',
-              _editedPessoa.vbDataHoraFinal,
-              (val) => _editedPessoa.vbDataHoraFinal = val,
-            ),*/
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              _buildTextField('Parent ID', _editedPessoa.iIDPai.toString(),
+                  (val) => _editedPessoa.iIDPai = int.parse(val)),
+              _buildTextField('Name', _editedPessoa.vbNome,
+                  (val) => _editedPessoa.vbNome = val),
+              _buildTextField('Type', _editedPessoa.bTipo,
+                  (val) => _editedPessoa.bTipo = val),
+              _buildTextField('Password', _editedPessoa.vbSenha,
+                  (val) => _editedPessoa.vbSenha = val),
+              _buildTextField('RFID', _editedPessoa.vbRfid,
+                  (val) => _editedPessoa.vbRfid = val),
+              _buildTextField('NFC', _editedPessoa.vbNfc,
+                  (val) => _editedPessoa.vbNfc = val),
+              _buildTextField('Pav', _editedPessoa.vbPav,
+                  (val) => _editedPessoa.vbPav = val),
+              _buildTextField('Weekday', _editedPessoa.bDiaSemana,
+                  (val) => _editedPessoa.bDiaSemana = int.parse(val)),
+              _buildByteField('Initial Hour', _editedPessoa.vbHrInicial,
+                  (val) => _editedPessoa.vbHrInicial = val),
+              _buildByteField('Final Hour', _editedPessoa.vbHrFinal,
+                  (val) => _editedPessoa.vbHrFinal = val),
+              _buildTextField(
+                  'Can Register',
+                  _editedPessoa.bPodeCadastrar.toString(),
+                  (val) => _editedPessoa.bPodeCadastrar = int.parse(val)),
+              _buildTextField(
+                'Can Release',
+                _editedPessoa.bPodeLiberar.toString(),
+                (val) => _editedPessoa.bPodeLiberar = int.parse(val),
+              ),
+              _buildTextField(
+                'Edited',
+                _editedPessoa.bEditado.toString(),
+                (val) => _editedPessoa.bEditado = int.parse(val),
+              ),
+              _buildByteField(
+                'Apartment',
+                _editedPessoa.bApartamento,
+                (val) => _editedPessoa.bApartamento = val,
+              ),
+              _buildTextField(
+                'Version',
+                _editedPessoa.vbVersao,
+                (val) => _editedPessoa.vbVersao = val,
+              ),
+              _buildByteField(
+                'Initial Date Time',
+                _editedPessoa.vbDataHoraInicial,
+                (val) => _editedPessoa.vbDataHoraInicial = val,
+              ),
+              _buildByteField(
+                'Final Date Time',
+                _editedPessoa.vbDataHoraFinal,
+                (val) => _editedPessoa.vbDataHoraFinal = val,
+              ),
+            ],
+          ),
         ),
       ),
       actions: <Widget>[
@@ -128,7 +132,9 @@ class _EditDialogState extends State<EditDialog> {
         TextButton(
           child: const Text('Save'),
           onPressed: () {
-            widget.onUpdate(_editedPessoa);
+            if (_formKey.currentState!.validate()) {
+              widget.onUpdate(_editedPessoa);
+            }
           },
         ),
       ],
