@@ -3,6 +3,8 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:mock_users/presenter/list_data/data_create.dart';
+
 class PessoaStruct {
   int iID;
   int iIDPai;
@@ -75,39 +77,59 @@ class PessoaStruct {
     offset += 1;
 
     // Encode vbSenha to UTF-8 and ensure it doesn't exceed 8 bytes
-    List<int> senhaBytes = utf8.encode(vbSenha);
-    recordBytes.setRange(
-        offset, offset + min(senhaBytes.length, 8), senhaBytes);
+    String adjustedSenha = '${vbSenha}00';
+    List<int> senhaBytes = utf8.encode(adjustedSenha);
+    Uint8List passwordBytes = Uint8List.fromList(senhaBytes);
+    DataCreate.converteSenha(passwordBytes);
+    recordBytes.setRange(offset, offset + 8, passwordBytes);
     offset += 8;
 
     // Encode vbRfid to UTF-8 and ensure it doesn't exceed 8 bytes
-    List<int> rfidBytes = utf8.encode(vbRfid);
-    recordBytes.setRange(offset, offset + min(rfidBytes.length, 8), rfidBytes);
+    List<int> rfidBytes = vbRfid
+        .split('.')
+        .map((segment) => int.tryParse(segment) ?? 0)
+        .toList()
+        .cast<int>();
+
+    rfidBytes =
+        List<int>.generate(8, (i) => i < rfidBytes.length ? rfidBytes[i] : 0);
+
+    recordBytes.setRange(offset, offset + 8, rfidBytes);
     offset += 8;
 
     // Encode vbNfc to UTF-8 and ensure it doesn't exceed 6 bytes
-    List<int> nfcBytes = utf8.encode(vbNfc);
-    recordBytes.setRange(offset, offset + min(nfcBytes.length, 6), nfcBytes);
+    List<int> nfcBytes = vbNfc
+        .split('.')
+        .map((segment) => int.tryParse(segment) ?? 0)
+        .toList()
+        .cast<int>();
+
+    nfcBytes =
+        List<int>.generate(6, (i) => i < nfcBytes.length ? nfcBytes[i] : 0);
+
+    recordBytes.setRange(offset, offset + 6, nfcBytes);
+
     offset += 6;
 
-    List<int> pavBytes = utf8.encode(vbPav);
-    recordBytes.setRange(offset, offset + min(pavBytes.length, 16), pavBytes);
+    List<int> pavBytes =
+        vbPav.split(", ").map((part) => int.parse(part)).toList().cast<int>();
+
+    if (pavBytes.length < 16) {
+      pavBytes.addAll(List.filled(16 - pavBytes.length, 0));
+    } else if (pavBytes.length > 16) {
+      pavBytes = pavBytes.sublist(0, 16);
+    }
+    recordBytes.setRange(offset, offset + 16, pavBytes);
     offset += 16;
 
     byteData.setUint8(offset, int.parse(bDiaSemana));
     offset += 1;
 
-    List<String> hrInicialParts = vbHrInicial.split(':');
-    byteData.setUint8(offset, int.parse(hrInicialParts[0]));
-    offset += 1;
-    byteData.setUint8(offset, int.parse(hrInicialParts[1]));
-    offset += 1;
+    recordBytes.setRange(offset, offset + 2, vbHrInicial);
+    offset += 2;
 
-    List<String> hrFinalParts = vbHrFinal.split(':');
-    byteData.setUint8(offset, int.parse(hrFinalParts[0]));
-    offset += 1;
-    byteData.setUint8(offset, int.parse(hrFinalParts[1]));
-    offset += 1;
+    recordBytes.setRange(offset, offset + 2, vbHrFinal);
+    offset += 2;
 
     byteData.setUint8(offset, int.parse(bPodeCadastrar));
     offset += 1;
@@ -116,22 +138,16 @@ class PessoaStruct {
     byteData.setUint8(offset, int.parse(bEditado));
     offset += 1;
 
-    List<int> apartamentoBytes = utf8.encode(bApartamento);
-    recordBytes.setRange(
-        offset, offset + min(apartamentoBytes.length, 6), apartamentoBytes);
+    recordBytes.setRange(offset, offset + 6, bApartamento);
     offset += 6;
 
     byteData.setUint8(offset, int.parse(vbVersao));
     offset += 1;
 
-    List<int> dataHoraInicialBytes = utf8.encode(vbDataHoraInicial);
-    recordBytes.setRange(offset, offset + min(dataHoraInicialBytes.length, 4),
-        dataHoraInicialBytes);
+    recordBytes.setRange(offset, offset + 4, vbDataHoraInicial);
     offset += 4;
 
-    List<int> dataHoraFinalBytes = utf8.encode(vbDataHoraFinal);
-    recordBytes.setRange(
-        offset, offset + min(dataHoraFinalBytes.length, 4), dataHoraFinalBytes);
+    recordBytes.setRange(offset, offset + 4, vbDataHoraFinal);
 
     return recordBytes;
   }
@@ -201,10 +217,10 @@ class DataReader {
       String bDiaSemana = buffer.getUint8(offset).toString();
       offset += 1;
 
-      String vbHrInicial = fileBytes.sublist(offset, offset + 2).toString();
+      List<int> vbHrInicial = [fileBytes[offset], fileBytes[offset + 1]];
       offset += 2;
 
-      String vbHrFinal = fileBytes.sublist(offset, offset + 2).toString();
+      List<int> vbHrFinal = [fileBytes[offset], fileBytes[offset + 1]];
       offset += 2;
 
       String bPodeCadastrar = buffer.getUint8(offset).toString();
@@ -216,17 +232,18 @@ class DataReader {
       String bEditado = buffer.getUint8(offset).toString();
       offset += 1;
 
-      String bApartamento = fileBytes.sublist(offset, offset + 6).toString();
+      List<int> bApartamento = fileBytes.sublist(offset, offset + 6).toList();
       offset += 6;
 
       String vbVersao = buffer.getUint8(offset).toString();
       offset += 1;
 
-      String vbDataHoraInicial =
-          fileBytes.sublist(offset, offset + 4).toString();
+      List<int> vbDataHoraInicial =
+          fileBytes.sublist(offset, offset + 4).toList();
       offset += 4;
 
-      String vbDataHoraFinal = fileBytes.sublist(offset, offset + 4).toString();
+      List<int> vbDataHoraFinal =
+          fileBytes.sublist(offset, offset + 4).toList();
       offset += 4;
 
       records.add(PessoaStruct(

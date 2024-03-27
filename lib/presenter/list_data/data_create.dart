@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math';
 import 'package:faker/faker.dart';
-import 'package:mock_users/presenter/list_data/data_read.dart';
 
 class DataCreate {
   final Faker faker = Faker();
@@ -13,23 +12,6 @@ class DataCreate {
   int targetRecords = 0;
   int currentId = 110;
   int currentRfidIndex = 0;
-
-  void updateRecord(String filePath, int index, PessoaStruct updatedRecord) {
-    // Calculate the offset for the record in the file
-    int offset = index * recordSize;
-
-    // Open the file for writing in random access mode
-    RandomAccessFile file = File(filePath).openSync(mode: FileMode.write);
-
-    // Move the file pointer to the position of the record
-    file.setPositionSync(offset);
-
-    // Write the updated record to the file
-    file.writeFromSync(updatedRecord.toBytes());
-
-    // Close the file
-    file.closeSync();
-  }
 
   Future<void> completeFileWithRecords(String originalFilePath) async {
     File originalFile = File(originalFilePath);
@@ -98,11 +80,9 @@ class DataCreate {
       Uint8List rfid = Uint8List(8); // Start with all bytes set to 0
       rfid[currentRfidIndex] = 1; // Set one byte to 1
 
-      // Assuming the RFID comes right after the password:
       int rfidStartPos = 44;
       recordBytes.setRange(rfidStartPos, rfidStartPos + 8, rfid);
 
-      // Prepare for the next record
       currentRfidIndex = (currentRfidIndex + 1) % 8;
 
       // Fill the rest of the fields with random data for simplicity
@@ -120,7 +100,7 @@ class DataCreate {
     print("Completed. New file with all records: ${newFile.path}");
   }
 
-  void converteSenha(Uint8List pt) {
+  static void converteSenha(Uint8List pt) {
     int aux;
     Uint8List senha = Uint8List(8);
 

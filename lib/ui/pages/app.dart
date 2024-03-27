@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:mock_users/presenter/app_logic/app_logic.dart';
+import 'package:mock_users/presenter/list_data/data_read.dart';
 import 'package:mock_users/ui/widgets/edit_dialog.dart.dart';
 
-import '../../presenter/list_data/data_read.dart';
-
 class AppScreen extends StatefulWidget {
-  const AppScreen({super.key});
+  const AppScreen({Key? key}) : super(key: key);
 
   @override
   _AppState createState() => _AppState();
 }
 
 class _AppState extends State<AppScreen> {
-  String previewData = "Preview Data";
   final AppLogic _appLogic = AppLogic();
-  String _fileContent = "Preview";
   String filePath = "";
 
   void _handleReadFile() async {
-    String data = await _appLogic.readFile();
+    List<PessoaStruct> data = await _appLogic.readFile();
     setState(() {
-      _fileContent = data;
+      _appLogic.records = data;
+      filePath = _appLogic.filePath;
     });
   }
 
@@ -29,14 +27,20 @@ class _AppState extends State<AppScreen> {
   }
 
   void _showEditDialog(BuildContext context, PessoaStruct pessoa, int index) {
-    EditDialog.show(context, pessoa, index, (updatedRecord) {
-      setState(() {
-        // Update the record in your data list
-        _appLogic.records[index] = updatedRecord;
-        // Update the file with the edited data (you need to implement this logic)
-        _dataCreate.updateRecord(filePath, index, updatedRecord);
-      });
-    });
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditDialog(
+          pessoa: pessoa,
+          onUpdate: (PessoaStruct updatedPessoa) {
+            setState(() {
+              _appLogic.updateRecord(filePath, index, updatedPessoa);
+            });
+            Navigator.of(context).pop();
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -62,16 +66,13 @@ class _AppState extends State<AppScreen> {
                   ),
                 ),
                 child: ListView.builder(
-                  itemCount: _appLogic.records
-                      .length, // Assume this is a list of PessoaStruct from your logic
+                  itemCount: _appLogic.records.length,
                   itemBuilder: (context, index) {
                     final pessoa = _appLogic.records[index];
                     return ListTile(
-                      title: Text(pessoa
-                          .toString()), // This should display a summary of your PessoaStruct
+                      title: Text(pessoa.toString()),
                       onTap: () {
-                        _showEditDialog(
-                            context, pessoa, index); // Implement this method
+                        _showEditDialog(context, pessoa, index);
                       },
                     );
                   },
