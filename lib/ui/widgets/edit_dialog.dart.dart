@@ -25,15 +25,6 @@ class _EditDialogState extends State<EditDialog> {
     _editedPessoa = widget.pessoa;
   }
 
-  Widget _buildTextField(
-      String label, String value, Function(String) onChanged) {
-    return TextFormField(
-      initialValue: value,
-      onChanged: onChanged,
-      decoration: InputDecoration(labelText: label),
-    );
-  }
-
   String bytesToHex(List<int> bytes) {
     return bytes.map((byte) => byte.toRadixString(16).padLeft(2, '0')).join();
   }
@@ -48,12 +39,66 @@ class _EditDialogState extends State<EditDialog> {
     return bytes;
   }
 
-  Widget _buildByteField(
+  Widget _buildTextField(
+      String label, String value, Function(String) onChanged) {
+    return TextFormField(
+      initialValue: value,
+      onChanged: onChanged,
+      decoration: InputDecoration(labelText: label),
+    );
+  }
+
+  Widget _buildHexField(
       String label, List<int> byteValue, Function(List<int>) onChanged) {
     return TextFormField(
       initialValue: bytesToHex(byteValue),
       onChanged: (val) => onChanged(hexToBytes(val)),
       decoration: InputDecoration(labelText: label),
+    );
+  }
+
+  Widget _buildByteField(
+      String label, List<int> byteValues, Function(List<int>) onChanged) {
+    String initialValue =
+        byteValues.map((byte) => byte.toString().padLeft(2, '0')).join(' ');
+
+    return TextFormField(
+      initialValue: initialValue,
+      decoration: InputDecoration(labelText: label),
+      onChanged: (value) {
+        // Convert the input string back into a list of byte values.
+        List<int> newByteValues =
+            value.split(' ').map((str) => int.tryParse(str) ?? 0).toList();
+        onChanged(newByteValues);
+      },
+    );
+  }
+
+  Widget _buildByteDataField(
+      String label, List<int> byteData, Function(List<int>) onChanged,
+      {int requiredLength = 6}) {
+    String initialValue =
+        String.fromCharCodes(byteData.where((byte) => byte != 0).toList());
+
+    return TextFormField(
+      initialValue: initialValue,
+      decoration: InputDecoration(labelText: label),
+      onChanged: (val) {
+        // Create a mutable list from the string's code units
+        List<int> updatedByteData = List<int>.from(val.codeUnits);
+
+        // Ensure updatedByteData has exactly requiredLength elements
+        if (updatedByteData.length < requiredLength) {
+          // Pad with zeros if too short
+          updatedByteData = List<int>.from(updatedByteData)
+            ..addAll(List.filled(requiredLength - updatedByteData.length, 0));
+        } else if (updatedByteData.length > requiredLength) {
+          // Truncate if too long
+          updatedByteData = updatedByteData.sublist(0, requiredLength);
+        }
+
+        onChanged(updatedByteData);
+      },
     );
   }
 
@@ -100,7 +145,7 @@ class _EditDialogState extends State<EditDialog> {
                 _editedPessoa.bEditado.toString(),
                 (val) => _editedPessoa.bEditado = int.parse(val),
               ),
-              _buildByteField(
+              _buildByteDataField(
                 'Apartment',
                 _editedPessoa.bApartamento,
                 (val) => _editedPessoa.bApartamento = val,
@@ -110,12 +155,12 @@ class _EditDialogState extends State<EditDialog> {
                 _editedPessoa.vbVersao,
                 (val) => _editedPessoa.vbVersao = val,
               ),
-              _buildByteField(
+              _buildHexField(
                 'Initial Date Time',
                 _editedPessoa.vbDataHoraInicial,
                 (val) => _editedPessoa.vbDataHoraInicial = val,
               ),
-              _buildByteField(
+              _buildHexField(
                 'Final Date Time',
                 _editedPessoa.vbDataHoraFinal,
                 (val) => _editedPessoa.vbDataHoraFinal = val,

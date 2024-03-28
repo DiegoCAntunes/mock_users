@@ -13,13 +13,24 @@ class AppScreen extends StatefulWidget {
 class _AppState extends State<AppScreen> {
   final AppLogic _appLogic = AppLogic();
   String filePath = "";
+  bool _isLoading = false;
 
   void _handleReadFile() async {
-    List<PessoaStruct> data = await _appLogic.readFile();
     setState(() {
-      _appLogic.records = data;
-      filePath = _appLogic.filePath;
+      _isLoading = true;
     });
+    try {
+      List<PessoaStruct> data = await _appLogic.readFile();
+      setState(() {
+        _appLogic.records = data;
+        filePath = _appLogic.filePath;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _handleCompleteList() async {
@@ -50,61 +61,63 @@ class _AppState extends State<AppScreen> {
         title: const Text("Lista de Usuários"),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                width: 550,
-                height: 300,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 1,
-                  ),
-                ),
-                child: ListView.builder(
-                  itemCount: _appLogic.records.length,
-                  itemBuilder: (context, index) {
-                    final pessoa = _appLogic.records[index];
-                    return ListTile(
-                      title: Text(pessoa.toString()),
-                      onTap: () {
-                        _showEditDialog(context, pessoa, index);
-                      },
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        child: _isLoading
+            ? const CircularProgressIndicator()
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    ElevatedButton(
-                      onPressed: _handleReadFile,
-                      child: const Text("Read File"),
+                    Container(
+                      width: 550,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                      ),
+                      child: ListView.builder(
+                        itemCount: _appLogic.records.length,
+                        itemBuilder: (context, index) {
+                          final pessoa = _appLogic.records[index];
+                          return ListTile(
+                            title: Text(pessoa.toString()),
+                            onTap: () {
+                              _showEditDialog(context, pessoa, index);
+                            },
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(
-                      width: 20,
+                      height: 20,
                     ),
-                    ElevatedButton(
-                      onPressed: _handleCompleteList,
-                      child: const Text("Complete List"),
-                    ),
-                    const SizedBox(
-                      width: 20,
-                    ),
+                    Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: _handleReadFile,
+                            child: const Text("Read File"),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          ElevatedButton(
+                            onPressed: _handleCompleteList,
+                            child: const Text("Complete List"),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
-              )
-            ],
-          ),
-        ),
+              ),
       ),
     );
   }
