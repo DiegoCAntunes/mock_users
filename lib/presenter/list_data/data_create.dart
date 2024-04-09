@@ -10,7 +10,7 @@ class DataCreate {
   final int recordSize = 96;
   int lastId = 0;
   int targetRecords = 0;
-  int currentId = 110;
+  int currentId = 109;
   int currentRfidIndex = 0;
 
   Future<void> completeFileWithRecords(String originalFilePath) async {
@@ -26,7 +26,9 @@ class DataCreate {
         final id = ByteData.sublistView(
                 existingData, i * recordSize, i * recordSize + 2)
             .getUint16(0, Endian.little);
-        if (id > lastId) lastId = id; // Update lastId if this ID is higher
+        print(id);
+        print(lastId);
+        if (id >= lastId) lastId = id + 1; // Update lastId if this ID is higher
         targetRecords = 4001 - lastId;
       }
     }
